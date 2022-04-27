@@ -117,7 +117,7 @@ struct EllipticCurveScalar {
   public:
     typedef T result_type;
 
-#ifdef __clang__
+#ifdef __clang__ 
     constexpr static T min() {
       return (std::numeric_limits<T>::min)();
     }
@@ -126,11 +126,11 @@ struct EllipticCurveScalar {
       return (std::numeric_limits<T>::max)();
     }
 #else
-    static T(min)() {
+    constexpr static T(min)() {
       return (std::numeric_limits<T>::min)();
     }
 
-    static T(max)() {
+    constexpr static T(max)() {
       return (std::numeric_limits<T>::max)();
     }
 #endif

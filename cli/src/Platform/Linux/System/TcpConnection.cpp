@@ -25,6 +25,7 @@
 #include <System/ErrorMessage.h>
 #include <System/InterruptedException.h>
 #include <System/Ipv4Address.h>
+#include <stdexcept>
 
 namespace System {
 

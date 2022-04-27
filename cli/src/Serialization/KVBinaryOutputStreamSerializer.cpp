@@ -21,6 +21,7 @@
 #include <cassert>
 #include <stdexcept>
 #include <Common/StreamTools.h>
+#include <limits>
 
 using namespace Common;
 using namespace CryptoNote;

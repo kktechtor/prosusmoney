@@ -26,6 +26,8 @@
 #include <ucontext.h>
 #include <unistd.h>
 #include "ErrorMessage.h"
+#include <stdexcept>
+#include <pthread.h>
 
 namespace System {
 

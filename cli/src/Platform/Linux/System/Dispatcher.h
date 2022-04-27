@@ -24,6 +24,7 @@
 #ifndef __GLIBC__
 #include <bits/reg.h>
 #endif
+#include <cstdint>
 
 namespace System {
 
@@ -88,9 +89,16 @@ public:
 # else
   static const int SIZEOF_PTHREAD_MUTEX_T = 32;
 # endif
+# elif __aarch64__
+# if __WORDSIZE == 64
+  static const int SIZEOF_PTHREAD_MUTEX_T = 48;
+# else
+  static const int SIZEOF_PTHREAD_MUTEX_T = 32;
+# endif
 #else
   static const int SIZEOF_PTHREAD_MUTEX_T = 24;
 #endif
+
 
 private:
   void spawn(std::function<void()>&& procedure);

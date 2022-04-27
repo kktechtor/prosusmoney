@@ -3,6 +3,10 @@ if (WIN32)
  option(CMAKE_USE_WIN32_THREADS_INIT "using WIN32 threads" ON)
 endif()
 set(VERSION "0.1")
+# Add path for custom modules
+list(INSERT CMAKE_MODULE_PATH 0
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
+  )
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
@@ -18,33 +22,9 @@ string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_LOWER)
 # when ARCH is not set to an explicit identifier, cmake's builtin is used
 # to identify the target architecture, to direct logic in this cmake script.
 # Since ARCH is a cached variable, it will not be set on first cmake invocation.
-if (NOT ARCH OR ARCH STREQUAL "" OR ARCH STREQUAL "native" OR ARCH STREQUAL "default")
-  set(ARCH_ID "${CMAKE_SYSTEM_PROCESSOR}")
-else()
-  set(ARCH_ID "${ARCH}")
-endif()
-string(TOLOWER "${ARCH_ID}" ARM_ID)
-string(SUBSTRING "${ARM_ID}" 0 3 ARM_TEST)
-if (ARM_TEST STREQUAL "arm")
-  set(ARM 1)
-  string(SUBSTRING "${ARM_ID}" 0 5 ARM_TEST)
-  if (ARM_TEST STREQUAL "armv6")
-    set(ARM6 1)
-  endif()
-  if (ARM_TEST STREQUAL "armv7")
-    set(ARM7 1)
-  endif()
-endif()
 
-if (ARM_ID STREQUAL "aarch64" OR ARM_ID STREQUAL "arm64" OR ARM_ID STREQUAL "armv8-a")
-  set(ARM 1)
-  set(ARM8 1)
-  set(ARCH "armv8-a")
-endif()
-
-if(ARCH_ID STREQUAL "ppc64le")
-  set(PPC64LE 1)
-endif()
+include(arm)
+include(ppc)
 
 if(WIN32 OR ARM)
   set(OPT_FLAGS_RELEASE "-O2")
@@ -63,8 +43,10 @@ endif()
 set(CMAKE_C_FLAGS_RELEASE "-DNDEBUG ${OPT_FLAGS_RELEASE}")
 set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG ${OPT_FLAGS_RELEASE}")
 
-list(INSERT CMAKE_MODULE_PATH 0
-  "${CMAKE_SOURCE_DIR}/cmake")
+#list(INSERT CMAKE_MODULE_PATH 0
+#    "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+#set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+#message("${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 if (NOT DEFINED ENV{DEVELOPER_LOCAL_TOOLS})
   message(STATUS "Could not find DEVELOPER_LOCAL_TOOLS in env (not required)")
@@ -292,9 +274,12 @@ else()
   option(NO_AES "Explicitly disable AES support" ${NO_AES})
   
   if(NOT NO_AES AND NOT ARM AND NOT PPC64LE)
-    message(STATUS "AES support enabled")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -maes")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -maes")
+      if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL aarch64)
+       message(STATUS "AES support not available on aarch64")
+      else()   
+       set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -maes")
+       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -maes")
+      endif()
   elseif(PPC64LE)
     message(STATUS "AES support not available on ppc64le")
   elseif(ARM6)
@@ -469,6 +454,7 @@ endif()
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND NOT ANDROID)
     set(CMAKE_EXE_LINKER_FLAGS "-pthread")
+        set(Boost_NO_BOOST_CMAKE ON)
 	set(Boost_USE_STATIC_LIBS ON)
     set(Boost_USE_STATIC_RUNTIME ON)
 endif()
@@ -549,7 +535,6 @@ option(BUILD_TESTS "Build tests." OFF)
 if(BUILD_TESTS)
   add_subdirectory(tests)
 endif()
-
 
 
 set(COMMIT_ID_IN_VERSION ON CACHE BOOL "Include commit ID in version")

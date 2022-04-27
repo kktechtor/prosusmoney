@@ -25,6 +25,7 @@
 #include "TransactionUtils.h"
 #include "CryptoNoteCore/CryptoNoteTools.h"
 
+#include <memory>
 using namespace Crypto;
 
 namespace CryptoNote {
