@@ -34,6 +34,7 @@ extern	int		getmcontext(mctx*);
 extern	void		setmcontext(const mctx*);
 
 struct mcontext {
+#ifdef __X86_64__
   /*
    * The first 20 fields must match the definition of
    * sigcontext. So that we can support sigcontext
@@ -78,6 +79,15 @@ struct mcontext {
    */
   long	mc_fpstate[64];
   long	mc_spare[8];
+#elif defined(__aarch64__)
+    long __x[29]; // x0-x28
+    long __fp;    // Frame pointer x29
+    long __lr;    // Link register x30
+    long __sp;    // Stack pointer x31
+    long __pc;    // Program counter
+    long __ra_sign_state; // RA sign state register
+double  _vectorHalfRegisters[32];
+#endif
 };
 
 struct ucontext {
